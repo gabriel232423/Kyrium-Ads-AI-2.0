@@ -1,0 +1,414 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'models/app_state.dart';
+import 'kyra_assistant.dart';
+import 'turbo_operation.dart';
+import 'product_upload_screen.dart';
+import 'platforms_screen.dart';
+
+class DashboardScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+    
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: Row(
+          children: [
+            Icon(Icons.public, color: Colors.amber),
+            SizedBox(width: 10),
+            Text(
+              'KYRIUM GLOBAL EMPIRE',
+              style: TextStyle(
+                color: Colors.amber,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.shopping_cart, color: Colors.amber),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PlatformsScreen())),
+          ),
+        ],
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Comandante, Chef!',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 5),
+            Text(
+              'Seu império global aguarda seus comandos',
+              style: TextStyle(
+                color: Colors.amber,
+                fontSize: 16,
+              ),
+            ),
+            SizedBox(height: 30),
+            
+            // Cartão de Fase Global
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.amber, Colors.orange],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'FASE ATUAL - VENDAS GLOBAIS',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    appState.phase,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  LinearProgressIndicator(
+                    value: 0.4,
+                    backgroundColor: Colors.black26,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+            
+            // Reinvestimento Automático
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey[900],
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.amber),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    'REINVESTIMENTO AUTOMÁTICO GLOBAL',
+                    style: TextStyle(
+                      color: Colors.amber,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.remove_circle, color: Colors.red),
+                        onPressed: () {
+                          if (appState.reinvestment > 0) {
+                            appState.updateReinvestment(appState.reinvestment - 5);
+                          }
+                        },
+                      ),
+                      Text(
+                        '${appState.reinvestment.toInt()}%',
+                        style: TextStyle(
+                          color: Colors.amber,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.add_circle, color: Colors.green),
+                        onPressed: () {
+                          if (appState.reinvestment < 100) {
+                            appState.updateReinvestment(appState.reinvestment + 5);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Todo produto acima de \$100 tem ${appState.reinvestment.toInt()}% reinvestido globalmente',
+                    style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+            
+            // Métricas Globais em 4 Moedas
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'VENDAS GLOBAIS - 4 MOEDAS',
+                  style: TextStyle(
+                    color: Colors.amber,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 15),
+                GridView.count(
+                  crossAxisCount: 2,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  childAspectRatio: 1.8,
+                  crossAxisSpacing: 15,
+                  mainAxisSpacing: 15,
+                  children: [
+                    _buildCurrencyCard('🇧🇷 REAL', 'R\$${appState.revenues['BRL']!.toStringAsFixed(2)}', Colors.green),
+                    _buildCurrencyCard('🇺🇸 DÓLAR', '\$${appState.revenues['USD']!.toStringAsFixed(2)}', Colors.blue),
+                    _buildCurrencyCard('🇪🇺 EURO', '€${appState.revenues['EUR']!.toStringAsFixed(2)}', Colors.yellow),
+                    _buildCurrencyCard('🇬🇧 LIBRA', '£${appState.revenues['GBP']!.toStringAsFixed(2)}', Colors.red),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: 30),
+            
+            // Botões de Ação Global
+            _buildActionButtons(context),
+            SizedBox(height: 30),
+            
+            // Plataformas Conectadas Globalmente
+            _buildPlatformsStatus(appState.platforms, context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCurrencyCard(String currency, String value, Color color) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color),
+      ),
+      padding: EdgeInsets.all(15),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            currency,
+            style: TextStyle(
+              color: color,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              color: Colors.amber,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(BuildContext context) {
+    return Column(
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: 60,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Colors.amber,
+              onPrimary: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => KyraAssistant()));
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.mic, size: 24),
+                SizedBox(width: 10),
+                Text(
+                  '🎙️ FALAR COM KYRA',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 60,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Colors.orange,
+              onPrimary: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => TurboOperation()));
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.rocket_launch, size: 24),
+                SizedBox(width: 10),
+                Text(
+                  '🚀 OPERAÇÃO TURBO GLOBAL',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 60,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              primary: Colors.grey[800]!,
+              onPrimary: Colors.amber,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              side: BorderSide(color: Colors.amber),
+            ),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ProductUploadScreen()));
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.upload, size: 24),
+                SizedBox(width: 10),
+                Text(
+                  '📦 CRIAR PRODUTO CAMPEÃO',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlatformsStatus(List<PlatformConfig> platforms, BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'PLATAFORMAS GLOBAIS CONECTADAS',
+                style: TextStyle(
+                  color: Colors.amber,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Spacer(),
+              TextButton(
+                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => PlatformsScreen())),
+                child: Text(
+                  'VER TODAS',
+                  style: TextStyle(color: Colors.amber),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 15),
+          Column(
+            children: platforms.take(3).map((platform) => _buildPlatformItem(platform)).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPlatformItem(PlatformConfig platform) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(
+            platform.apiConnected ? Icons.check_circle : Icons.error,
+            color: platform.apiConnected ? Colors.green : Colors.red,
+            size: 16,
+          ),
+          SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              platform.name,
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: platform.apiType == 'Oficial' ? Colors.green : Colors.orange,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              platform.apiType,
+              style: TextStyle(color: Colors.white, fontSize: 10),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
