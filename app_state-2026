@@ -1,0 +1,100 @@
+import 'package:flutter/foundation.dart';
+
+class AppState with ChangeNotifier {
+  // Métricas de Vendas Globais em 4 moedas
+  Map<String, double> _revenues = {
+    'BRL': 12500.0,
+    'USD': 2400.0,
+    'EUR': 2200.0,
+    'GBP': 1900.0,
+  };
+  
+  Map<String, double> get revenues => _revenues;
+  
+  String _phase = "FASE 1 - VALIDAÇÃO GLOBAL (Meta: R\$18k)";
+  String get phase => _phase;
+  
+  double _reinvestment = 30.0; // 30% padrão
+  double get reinvestment => _reinvestment;
+  
+  // Plataformas conectadas globalmente
+  List<PlatformConfig> _platforms = [
+    PlatformConfig(
+      name: 'Kiwify',
+      phase: 'Fase 1',
+      apiConnected: false,
+      apiType: 'Oficial',
+    ),
+    PlatformConfig(
+      name: 'Meta Ads', 
+      phase: 'Fase 1',
+      apiConnected: false,
+      apiType: 'Oficial',
+    ),
+    PlatformConfig(
+      name: 'Hotmart',
+      phase: 'Fase 2',
+      apiConnected: false,
+      apiType: 'Oficial',
+    ),
+    PlatformConfig(
+      name: 'Google Ads',
+      phase: 'Fase 2',
+      apiConnected: false,
+      apiType: 'Oficial',
+    ),
+  ];
+  
+  List<PlatformConfig> get platforms => _platforms;
+  
+  void updateRevenue(String currency, double value) {
+    _revenues[currency] = value;
+    notifyListeners();
+  }
+  
+  void updateReinvestment(double value) {
+    _reinvestment = value;
+    notifyListeners();
+  }
+  
+  void addPlatform(PlatformConfig platform) {
+    _platforms.add(platform);
+    notifyListeners();
+  }
+  
+  void updatePlatformApiStatus(int index, bool connected, String apiType) {
+    _platforms[index] = _platforms[index].copyWith(
+      apiConnected: connected,
+      apiType: apiType,
+    );
+    notifyListeners();
+  }
+}
+
+class PlatformConfig {
+  final String name;
+  final String phase;
+  final bool apiConnected;
+  final String apiType;
+  
+  PlatformConfig({
+    required this.name,
+    required this.phase,
+    required this.apiConnected,
+    required this.apiType,
+  });
+  
+  PlatformConfig copyWith({
+    String? name,
+    String? phase,
+    bool? apiConnected,
+    String? apiType,
+  }) {
+    return PlatformConfig(
+      name: name ?? this.name,
+      phase: phase ?? this.phase,
+      apiConnected: apiConnected ?? this.apiConnected,
+      apiType: apiType ?? this.apiType,
+    );
+  }
+}
