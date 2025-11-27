@@ -1,0 +1,666 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'models/app_state.dart';
+
+class PlatformsScreen extends StatefulWidget {
+  @override
+  _PlatformsScreenState createState() => _PlatformsScreenState();
+}
+
+class _PlatformsScreenState extends State<PlatformsScreen> {
+  final ImagePicker _picker = ImagePicker();
+  File? _platformImage;
+  String _customPlatformName = '';
+
+  final List<PlatformTemplate> _platformTemplates = [
+    PlatformTemplate(
+      name: 'Kiwify',
+      phase: 'Fase 1',
+      logo: '🛒',
+      fields: [
+        ApiField(name: 'API Key', type: 'text', required: true),
+        ApiField(name: 'Secret Key', type: 'text', required: true),
+        ApiField(name: 'Webhook URL', type: 'url', required: false),
+      ],
+    ),
+    PlatformTemplate(
+      name: 'Meta Ads',
+      phase: 'Fase 1',
+      logo: '📱',
+      fields: [
+        ApiField(name: 'App ID', type: 'text', required: true),
+        ApiField(name: 'App Secret', type: 'text', required: true),
+        ApiField(name: 'Access Token', type: 'text', required: true),
+        ApiField(name: 'Ad Account ID', type: 'text', required: true),
+      ],
+    ),
+    PlatformTemplate(
+      name: 'Hotmart',
+      phase: 'Fase 2',
+      logo: '🔥',
+      fields: [
+        ApiField(name: 'Client ID', type: 'text', required: true),
+        ApiField(name: 'Client Secret', type: 'text', required: true),
+        ApiField(name: 'Webhook Token', type: 'text', required: false),
+      ],
+    ),
+    PlatformTemplate(
+      name: 'Google Ads',
+      phase: 'Fase 2',
+      logo: '🔍',
+      fields: [
+        ApiField(name: 'Developer Token', type: 'text', required: true),
+        ApiField(name: 'Client ID', type: 'text', required: true),
+        ApiField(name: 'Client Secret', type: 'text', required: true),
+        ApiField(name: 'Refresh Token', type: 'text', required: true),
+      ],
+    ),
+  ];
+
+  // FUNÇÃO PARA TIRAR FOTO DA PLATAFORMA
+  Future<void> _takePlatformPhoto() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.camera,
+      preferredCameraDevice: CameraDevice.rear,
+      maxWidth: 800,
+      maxHeight: 600,
+    );
+
+    if (image != null) {
+      setState(() {
+        _platformImage = File(image.path);
+      });
+      
+      // Simular análise da Kyra
+      _simulateKyraAnalysis();
+    }
+  }
+
+  // FUNÇÃO PARA ENVIAR DA GALERIA
+  Future<void> _pickPlatformPhoto() async {
+    final XFile? image = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      maxHeight: 600,
+    );
+
+    if (image != null) {
+      setState(() {
+        _platformImage = File(image.path);
+      });
+      
+      _simulateKyraAnalysis();
+    }
+  }
+
+  // SIMULAR ANÁLISE DA KYRA
+  void _simulateKyraAnalysis() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text(
+          '🎯 KYRA ANALISANDO PLATAFORMA...',
+          style: TextStyle(color: Colors.amber),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircularProgressIndicator(color: Colors.amber),
+            SizedBox(height: 20),
+            Text(
+              'Chef, estou analisando a imagem da plataforma...\n'
+              '• Identificando logotipo\n'
+              '• Reconhecendo padrões de API\n'
+              '• Preparando configuração automática\n'
+              '• Integrando ao sistema global',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Simular tempo de análise
+    Future.delayed(Duration(seconds: 3), () {
+      Navigator.pop(context);
+      _showPlatformRecognitionResult();
+    });
+  }
+
+  // MOSTRAR RESULTADO DO RECONHECIMENTO
+  void _showPlatformRecognitionResult() {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: Colors.grey[900],
+          title: Text(
+            '✅ PLATAFORMA IDENTIFICADA!',
+            style: TextStyle(color: Colors.amber),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_platformImage != null)
+                Container(
+                  height: 100,
+                  width: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    image: DecorationImage(
+                      image: FileImage(_platformImage!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              SizedBox(height: 15),
+              TextFormField(
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'Nome da Plataforma',
+                  labelStyle: TextStyle(color: Colors.amber),
+                  hintText: 'Ex: Nova Plataforma, Eduzz, Monetizze...',
+                  hintStyle: TextStyle(color: Colors.grey),
+                  border: OutlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+                  focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    _customPlatformName = value;
+                  });
+                },
+              ),
+              SizedBox(height: 15),
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.amber),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.auto_awesome, color: Colors.amber),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Kyra identificou: Plataforma de Produtos Digitais\n'
+                        'Sugestão: ${_customPlatformName.isNotEmpty ? _customPlatformName : "Nova Plataforma"}',
+                        style: TextStyle(color: Colors.amber, fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('CANCELAR', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(primary: Colors.amber),
+              onPressed: _customPlatformName.isNotEmpty ? () {
+                _addCustomPlatform();
+                Navigator.pop(context);
+              } : null,
+              child: Text('ADICIONAR PLATAFORMA', style: TextStyle(color: Colors.black)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ADICIONAR PLATAFORMA PERSONALIZADA
+  void _addCustomPlatform() {
+    final appState = Provider.of<AppState>(context, listen: false);
+    
+    appState.addPlatform(PlatformConfig(
+      name: _customPlatformName,
+      phase: 'Personalizada',
+      apiConnected: false,
+      apiType: 'A ser configurada',
+    ));
+
+    // Limpar imagem após adicionar
+    setState(() {
+      _platformImage = null;
+      _customPlatformName = '';
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('✅ $_customPlatformName adicionada por análise da Kyra!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appState = Provider.of<AppState>(context);
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: Text(
+          '🌐 PLATAFORMAS GLOBAIS',
+          style: TextStyle(color: Colors.amber),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.amber),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      body: Column(
+        children: [
+          // Header Info
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.amber, Colors.orange],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'CONEXÃO COM PLATAFORMAS GLOBAIS',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  'Configure APIs ou tire foto para Kyra analisar',
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.all(20),
+              children: [
+                // BOTÃO DE UPLOAD DE IMAGEM
+                _buildImageUploadSection(),
+                SizedBox(height: 30),
+
+                // Plataformas Conectadas
+                _buildConnectedPlatforms(appState.platforms),
+                SizedBox(height: 30),
+
+                // Templates de Plataformas
+                _buildPlatformTemplates(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // SEÇÃO DE UPLOAD DE IMAGEM
+  Widget _buildImageUploadSection() {
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.grey[900],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.amber),
+      ),
+      child: Column(
+        children: [
+          Text(
+            '📸 ENVIAR IMAGEM DA PLATAFORMA',
+            style: TextStyle(
+              color: Colors.amber,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 10),
+          Text(
+            'Tire foto ou envie print da plataforma\nKyra vai analisar e configurar automaticamente',
+            style: TextStyle(color: Colors.grey),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 20),
+          
+          // Preview da imagem
+          if (_platformImage != null)
+            Container(
+              height: 120,
+              width: 120,
+              margin: EdgeInsets.only(bottom: 15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: FileImage(_platformImage!),
+                  fit: BoxFit.cover,
+                ),
+                border: Border.all(color: Colors.amber),
+              ),
+            ),
+
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.amber,
+                    onPrimary: Colors.black,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                  ),
+                  onPressed: _takePlatformPhoto,
+                  icon: Icon(Icons.camera_alt),
+                  label: Text('TIRAR FOTO'),
+                ),
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.grey[800],
+                    onPrimary: Colors.amber,
+                    padding: EdgeInsets.symmetric(vertical: 15),
+                    side: BorderSide(color: Colors.amber),
+                  ),
+                  onPressed: _pickPlatformPhoto,
+                  icon: Icon(Icons.photo_library),
+                  label: Text('GALERIA'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildConnectedPlatforms(List<PlatformConfig> platforms) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'PLATAFORMAS CONECTADAS',
+          style: TextStyle(
+            color: Colors.amber,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 15),
+        ...platforms.map((platform) => _buildPlatformCard(platform)).toList(),
+      ],
+    );
+  }
+
+  Widget _buildPlatformCard(PlatformConfig platform) {
+    return Card(
+      color: Colors.grey[900],
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: platform.apiConnected ? Colors.green : Colors.red,
+          child: Icon(
+            platform.apiConnected ? Icons.check : Icons.link_off,
+            color: Colors.white,
+            size: 20,
+          ),
+        ),
+        title: Text(
+          platform.name,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              platform.phase,
+              style: TextStyle(color: Colors.grey),
+            ),
+            SizedBox(height: 4),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: platform.apiType == 'Oficial' ? Colors.green : Colors.orange,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'API ${platform.apiType}',
+                style: TextStyle(color: Colors.white, fontSize: 10),
+              ),
+            ),
+          ],
+        ),
+        trailing: IconButton(
+          icon: Icon(Icons.settings, color: Colors.amber),
+          onPressed: () => _showPlatformConfig(platform),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlatformTemplates() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'PLATAFORMAS PRÉ-CONFIGURADAS',
+          style: TextStyle(
+            color: Colors.amber,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 15),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: _platformTemplates.map((template) => _buildPlatformTemplate(template)).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPlatformTemplate(PlatformTemplate template) {
+    return ActionChip(
+      avatar: Text(template.logo, style: TextStyle(fontSize: 16)),
+      label: Text(template.name),
+      backgroundColor: Colors.grey[800],
+      labelStyle: TextStyle(color: Colors.white),
+      onPressed: () => _showTemplateConfig(template),
+    );
+  }
+
+  void _showTemplateConfig(PlatformTemplate template) {
+    final appState = Provider.of<AppState>(context, listen: false);
+    final Map<String, TextEditingController> controllers = {};
+
+    for (var field in template.fields) {
+      controllers[field.name] = TextEditingController();
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: Colors.grey[900],
+          title: Text(
+            '🔧 ${template.name} - CONFIGURAÇÃO API',
+            style: TextStyle(color: Colors.amber),
+          ),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                ...template.fields.map((field) => Padding(
+                  padding: EdgeInsets.only(bottom: 15),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            field.name,
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                          if (field.required)
+                            Text(' *', style: TextStyle(color: Colors.red)),
+                        ],
+                      ),
+                      SizedBox(height: 5),
+                      TextFormField(
+                        controller: controllers[field.name],
+                        style: TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Digite ${field.name.toLowerCase()}...',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          border: OutlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+                          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.amber)),
+                        ),
+                        obscureText: field.type.contains('secret') || field.type.contains('token'),
+                      ),
+                    ],
+                  ),
+                )).toList(),
+                SizedBox(height: 20),
+                Container(
+                  padding: EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info, color: Colors.amber),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Kyra verificando conexão API...\n'
+                          'Status: ${_getApiStatus(template.name)}',
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('CANCELAR', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(primary: Colors.amber),
+              onPressed: () {
+                final apiType = _testApiConnection(template.name) ? 'Oficial' : 'Não Oficial';
+                
+                appState.addPlatform(PlatformConfig(
+                  name: template.name,
+                  phase: template.phase,
+                  apiConnected: true,
+                  apiType: apiType,
+                ));
+                
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('✅ ${template.name} conectada com API $apiType'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              child: Text('CONECTAR API', style: TextStyle(color: Colors.black)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPlatformConfig(PlatformConfig platform) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text(
+          '⚙️ ${platform.name}',
+          style: TextStyle(color: Colors.amber),
+        ),
+        content: Text(
+          'Configurações detalhadas da plataforma\n'
+          'Status: ${platform.apiConnected ? 'Conectado' : 'Desconectado'}\n'
+          'Tipo API: ${platform.apiType}\n'
+          'Fase: ${platform.phase}',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('FECHAR', style: TextStyle(color: Colors.amber)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getApiStatus(String platformName) {
+    if (platformName.contains('Kiwify') || platformName.contains('Meta')) {
+      return '✅ API Oficial Detectada';
+    } else {
+      return '⚠️ API Não Oficial - Verifique as credenciais';
+    }
+  }
+
+  bool _testApiConnection(String platformName) {
+    return platformName.contains('Kiwify') || platformName.contains('Meta');
+  }
+}
+
+class PlatformTemplate {
+  final String name;
+  final String phase;
+  final String logo;
+  final List<ApiField> fields;
+
+  PlatformTemplate({
+    required this.name,
+    required this.phase,
+    required this.logo,
+    required this.fields,
+  });
+}
+
+class ApiField {
+  final String name;
+  final String type;
+  final bool required;
+
+  ApiField({
+    required this.name,
+    required this.type,
+    required this.required,
+  });
+}
